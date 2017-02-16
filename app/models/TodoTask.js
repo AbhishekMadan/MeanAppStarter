@@ -14,7 +14,6 @@ var Schema = mongoose.Schema;
  */
 
 var taskSchema = new Schema({
-    no : {type:Number},
     task : {type:String}
 },{collection:'todoTask'});
 

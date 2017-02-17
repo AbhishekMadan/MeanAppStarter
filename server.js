@@ -3,6 +3,7 @@
  */
 var express    = require('express');
 var app        = express();
+var path       = require('path');
 var mongoose   = require('mongoose');
 var todoTask   = require('./app/models/TodoTask');
 var morgan     = require('morgan');
@@ -13,6 +14,8 @@ const PORT = process.env.PORT || 8090;
 app.use(morgan('dev'));
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+app.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
+app.use(express.static(path.join(__dirname, 'public')));
 
 mongoose.connect('mongodb://localhost:27017/school',function (err) {
     if(err) {
@@ -22,9 +25,6 @@ mongoose.connect('mongodb://localhost:27017/school',function (err) {
     }
 });
 
-app.get('/',function (req,res) {
-    res.send('Hello World!');
-});
 
 /**
  * Get all the todo tasks
@@ -61,16 +61,21 @@ app.post('/api/todo',function (req,res) {
  *  2. req.query("tagId")         if passed is a query as /p?tagId=5
  */
 app.delete('/api/todo/:task_desc',function (req,res) {
-    todoTask.remove({task:req.params.task_desc},function (err) {
+    todoTask.remove({_id:req.params.task_desc},function (err) {
         if(err) {
             res.send(err);
         }
         todoTask.find({},function (err,tasks) {
+            console.log(tasks);
             res.send(tasks);
         });
     })
 });
 
+
+app.get('/',function (req,res) {
+    res.sendFile(__dirname + '/public/index.html');
+});
 
 app.listen(PORT,function () {
     console.log('Application Server started at :'+PORT);
